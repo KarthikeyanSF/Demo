@@ -9,5 +9,5 @@ def main(session):
         return "Python script executed successfully directly from GitHub!"
 
  # This part triggers the function and forces the local terminal to show the result (Not Mandatory)
-if __name__ == "__main__":
-    print(main(None))       
+# if __name__ == "__main__":
+#     print(main(None))       
