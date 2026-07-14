@@ -1,0 +1,46 @@
+name: Deploy Database Migrations to Snowflake
+
+on:
+  push:
+    branches:
+      - feature-new-table  # Triggers when you push to your branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Pull the code from your GitHub repo into the runner
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Set up Python environment (needed for Snowflake CLI tools)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. Install the official Snowflake CLI tool
+      - name: Install Snowflake CLI
+        run: |
+          pip install snowflake-cli-labs
+
+      # 4. CREATE THE CONFIG FILE (This is where our snippet goes!)
+      - name: Set up Snowflake Config File
+        run: |
+          mkdir -p ~/.snowflake
+          cat <<EOF > ~/.snowflake/config.toml
+          [connections.prod]
+          account = "${{ secrets.SNOWFLAKE_ACCOUNT }}"
+          user = "${{ secrets.SNOWFLAKE_USER }}"
+          password = "${{ secrets.SNOWFLAKE_PASSWORD }}"
+          role = "SYSADMIN"
+          warehouse = "COMPUTE_WH"
+          database = "PROD_DB"
+          schema = "PUBLIC"
+          EOF
+
+      # 5. Run the migration script using the created config file
+      - name: Run Snowflake Migration
+        run: |
+          snow sql -c prod -f migrations/V1.1.1__init_tables.sql
