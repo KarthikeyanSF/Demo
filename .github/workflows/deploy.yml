@@ -43,4 +43,4 @@ jobs:
       # 5. Run the migration script using the created config file
       - name: Run Snowflake Migration
         run: |
-          snow sql -c prod -f migrations/V1.1.1__init_tables.sql
+          snow sql -c prod -f migrations/v1.1.1__init_tables.sql
