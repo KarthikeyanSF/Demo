@@ -1,0 +1,31 @@
+name: Snowflake Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Snowflake CLI
+        uses: Snowflake-Labs/snowflake-cli-action@v1
+        with:
+          cli-version: "latest"
+          default-config-file-path: ".snowflake/config.toml"
+
+      - name: Fetch and Run Migrations
+        env:
+          SNOWFLAKE_CONNECTIONS_PROD_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        run: |
+          # 1. Force Snowflake's Git stage to pull the latest commit
+          snow git fetch my_github_repo
+          
+          # 2. Execute new migration scripts sequentially
+          snow sql -c prod -f migrations/V1.1.1__init_tables.sql
+          snow sql -c prod -f migrations/V1.1.2__add_users.sql
